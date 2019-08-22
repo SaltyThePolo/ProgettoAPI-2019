@@ -35,10 +35,12 @@ struct node* addUuserNode(struct node* node, struct uuser data){
     if (node == NULL){
         return createUsrNode(data);
     }
-    if(strcmp(node -> data.name, data.name) < 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
+    if(strcmp(node -> data.name, data.name) > 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
+        printf("con %s vado a sx \n", node -> data.name);
         node -> left  = addUuserNode(node -> left, data);
     }
-    if(strcmp(node -> data.name, data.name) > 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
+    if(strcmp(node -> data.name, data.name) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
+        printf("con %s vado a dx \n", node -> data.name);
         node -> right = addUuserNode(node -> right, data);
     }
     return node;
@@ -55,15 +57,15 @@ struct node* minUsrValueNode(struct node* node)
     return current;
 }
 
-struct node* deleteUuserNode(struct node* root, struct uuser data){
+struct node* rmvusrNode(struct node* root, struct uuser data){
     
     if (root == NULL){
         return root;            // in questo caso non cancello nulla
     }
-    if (strcmp(root -> data.name, data.name) < 0){
-        root -> left = deleteUuserNode(root -> left, data);
-    }else if (strcmp(root -> data.name, data.name) > 0){
-        root -> right = deleteUuserNode(root ->right, data);
+    if (strcmp(root -> data.name, data.name) > 0){
+        root -> left = rmvusrNode(root -> left, data);
+    }else if (strcmp(root -> data.name, data.name) < 0){
+        root -> right = rmvusrNode(root ->right, data);
     }else{ // sono nel posto giusto
         // node with only one child or no child
         if (root->left == NULL)
@@ -86,7 +88,7 @@ struct node* deleteUuserNode(struct node* root, struct uuser data){
         root->data = temp->data;
         
         // Delete the inorder successor
-        root->right = deleteUuserNode(root->right, temp->data);
+        root->right = rmvusrNode(root->right, temp->data);
     }
     return root;
 }
@@ -111,12 +113,14 @@ struct nodeRel *createRelNode(struct relation relation){
     struct nodeRel *temp =  (struct nodeRel *)malloc(sizeof(struct nodeRel));
     temp->relation = relation;
     temp->left = temp->right = NULL;
+    temp -> relation.next = NULL;
     return temp;
 }
-
-void addEntityToRelation(struct nodeRel* nodo, struct relation dato){
+// TODO da rivedere
+void addEntityToRel(struct nodeRel* nodo, struct relation dato){
     struct relation *temp = NULL;
-    while ( nodo -> relation.next != 0){
+    // struct relation *saveData = (struct relation *)malloc(sizeof(struct relation));
+    while ( nodo -> relation.next != NULL){
         temp = nodo -> relation.next;
     }
     if (temp != NULL){
@@ -174,14 +178,14 @@ struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation dato){
     if (nodo == NULL){
         return createRelNode(dato);
     }
-    if(strcmp(nodo -> relation.name, dato.name) < 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
+    if(strcmp(nodo -> relation.name, dato.name) > 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
         nodo -> left  = addRelNode(nodo -> left, dato);
     }
-    if(strcmp(nodo -> relation.name, dato.name) > 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
+    if(strcmp(nodo -> relation.name, dato.name) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
         nodo -> right = addRelNode(nodo -> right, dato);
     }
     if(strcmp(nodo -> relation.name, dato.name) == 0){
-        addEntityToRelation(nodo, dato);
+        addEntityToRel(nodo, dato);
     }
     return nodo;
 }
@@ -198,15 +202,15 @@ struct nodeRel* minRelValueNode(struct nodeRel* node)
 }
 
 
-struct nodeRel* deleteRelNode(struct nodeRel* root, struct relation dato){
+struct nodeRel* rmvRelNode(struct nodeRel* root, struct relation dato){
     
     if (root == NULL){
         return root;            // in questo caso non cancello nulla
     }
-    if (strcmp(root -> relation.name, dato.name) < 0){
-        root -> left = deleteRelNode(root -> left, dato);
-    }else if (strcmp(root -> relation.name, dato.name) > 0){
-        root -> right = deleteRelNode(root ->right, dato);
+    if (strcmp(root -> relation.name, dato.name) > 0){
+        root -> left = rmvRelNode(root -> left, dato);
+    }else if (strcmp(root -> relation.name, dato.name) < 0){
+        root -> right = rmvRelNode(root ->right, dato);
     }else{ // sono nel posto giusto
         
         // node with only one child or no child
@@ -228,61 +232,116 @@ struct nodeRel* deleteRelNode(struct nodeRel* root, struct relation dato){
         // Copy the inorder successor's content to this node
         root->relation = temp->relation;
         // Delete the inorder successor
-        root->right = deleteRelNode(root->right, temp->relation);
+        root->right = rmvRelNode(root->right, temp->relation);
     }
     return root;
 }
 
-void inorder(struct node *root)
+void usrInOrder(struct node *root)
 {
     if (root != NULL)
     {
-        inorder(root->left);
+        usrInOrder(root->left);
         printf("%s ", root->data.name);
-        inorder(root->right);
+        usrInOrder(root->right);
     }
 }
 
+void relInOrder(struct nodeRel *root)
+{
+    if (root != NULL)
+    {
+        relInOrder(root->left);
+        printf("%s ", root->relation.name);
+        printf("%s ", root->relation.from);
+        printf("%s ", root->relation.to);
+        relInOrder(root->right);
+    }
+}
 
+//-------------------------------------------------------------------------------------------------//
 int main(int argc, const char * argv[]) {
-    char a[15], b[15], c[15];
-    struct node *root = NULL;
+    char a[15], b[15], c[15], d[15];
+    short j = 0;
+    struct node *usrRoot = NULL;
+    struct nodeRel *relRoot = NULL;
     do {
-        printf("inserisci input: ");
-        for (int i = 0; i < 15; i++){
+        printf("scrivi ");
+        for (short i = 0; i < 15; i++){
             char temp = getchar_unlocked();
-            if (a[i] == ' ' || a[i] == EOF || i > 14) break;
+            if (temp == '\n'){
+                j = 1;
+                break;
+            }
+            if (temp == ' ' || temp == EOF ) break;
             a[i] = temp;
         }
-        printf("inserisci input: ");
-        for (int i = 0; i < 15; i++){
-            char temp = getchar_unlocked();
-            if (a[i] == ' ' || a[i] == EOF || i > 14) break;
-            a[i] = temp;
+        
+        if ( j == 0){
+            for (short i = 0; i < 15; i++){
+                char temp = getchar_unlocked();
+                if (temp == ' ' || temp == EOF) break;
+                if (temp == '\n') {
+                    j = 1;
+                    break;
+                }
+                b[i] = temp;
+            }
         }
-        printf("inserisci input: ");
-        for (int i = 0; i < 15; i++){
-            char temp = getchar_unlocked();
-            if (a[i] == ' ' || a[i] == EOF || i > 14) break;
-            a[i] = temp;
+        
+        if ( j == 0){
+            for (short i = 0; i < 15; i++){
+                char temp = getchar_unlocked();
+                if (temp == ' ' || temp == EOF) break;
+                if (temp == '\n') {
+                    j = 1;
+                    break;
+                }
+                c[i] = temp;
+            }
         }
+        
+        if( j == 0){
+            for (short i = 0; i < 15; i++){
+                char temp = getchar_unlocked();
+                if (temp == EOF || temp == '\n') break;
+                d[i] = temp;
+            }
+        }
+        j = 0;
 
         if (strcmp(a, "addent") == 0) {
             struct uuser temp;
             strcpy(temp.name, b);
-            root = addUuserNode(root, temp);
+            usrRoot = addUuserNode(usrRoot, temp);
             printf("aggiunto %s all'albero \n", b);
         }else if(strcmp(a, "delent") == 0){
-            
+            struct uuser temp;
+            strcpy(temp.name, b);
+            usrRoot = rmvusrNode(usrRoot, temp);
+            printf("rimosso %s all'albero \n", b);
+            //TODO eliminare tutte le relazioni
         }else if(strcmp(a, "addrel") == 0){
-            
+            struct relation temp;
+            strcpy(temp.name, b);
+            strcpy(temp.from, c);
+            strcpy(temp.to, d);
+            relRoot = addRelNode(relRoot, temp);
+            printf("ora %s è %s di %s", d, b, c);
         }else if(strcmp(a, "delrel") == 0){
             
         }else if(strcmp(a, "report") == 0){
-            inorder(root);
+            // usrInOrder(usrRoot);
+            relInOrder(relRoot);
         }
+ 
+        for (short i = 0; i < 15; i ++) a[i] = '\0';
+        for (short i = 0; i < 15; i ++) b[i] = '\0';
+        for (short i = 0; i < 15; i ++) c[i] = '\0';
+        for (short i = 0; i < 15; i ++) d[i] = '\0';
         
     } while ((strcmp(a, "end") != 0));
+    
     printf("Hello, World!\n");
     
     return 0;
