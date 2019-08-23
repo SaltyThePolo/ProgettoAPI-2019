@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct node *usrRoot = NULL;
+struct nodeRel *relRoot = NULL;
+
 struct uuser {
     char name[15];
     int count;
@@ -36,11 +39,9 @@ struct node* addUuserNode(struct node* node, struct uuser data){
         return createUsrNode(data);
     }
     if(strcmp(node -> data.name, data.name) > 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
-        printf("con %s vado a sx \n", node -> data.name);
         node -> left  = addUuserNode(node -> left, data);
     }
     if(strcmp(node -> data.name, data.name) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
-        printf("con %s vado a dx \n", node -> data.name);
         node -> right = addUuserNode(node -> right, data);
     }
     return node;
@@ -93,7 +94,22 @@ struct node* rmvusrNode(struct node* root, struct uuser data){
     return root;
 }
 
-// parte degli alberi per le relazioni
+
+void usrInOrder(struct node *root)
+{
+    if (root != NULL)
+    {
+        usrInOrder(root->left);
+        printf("%s ", root->data.name);
+        usrInOrder(root->right);
+    }
+}
+struct node* searchUser (struct node *root, char name[15]){
+    if (root == NULL|| strcmp(root ->data.name, name) == 0) return root;
+    if (strcmp(root -> data.name, name) > 0) return searchUser(root -> left, name);
+        return searchUser(root ->right, name);
+}
+// -----------------------------------------------------------------------------------------------------------------------------------------
 
 struct relation {
     char name[15];
@@ -118,16 +134,21 @@ struct nodeRel *createRelNode(struct relation relation){
 }
 // TODO da rivedere
 void addEntityToRel(struct nodeRel* nodo, struct relation dato){
-    struct relation *temp = NULL;
-    // struct relation *saveData = (struct relation *)malloc(sizeof(struct relation));
-    while ( nodo -> relation.next != NULL){
-        temp = nodo -> relation.next;
+    struct relation *temp = &(nodo->relation);
+    struct relation *pre =NULL;
+    while ( temp!=NULL){
+        pre = temp;
+        temp = temp->next;
     }
-    if (temp != NULL){
-    temp -> next = &dato;
-    }else{
-        nodo -> relation.next = &dato;
+    if(pre!=NULL){
+        pre -> next = malloc(sizeof(struct relation));
+        strcpy(pre -> next ->from, dato.from);
+        strcpy(pre -> next ->to, dato.to);
+        strcpy(pre -> next ->name, dato.name);
+        pre -> next -> next = NULL;
+        
     }
+    
 }
 
 void rmvEntityWithRel(struct nodeRel* nodo, struct relation dato){
@@ -146,32 +167,6 @@ void rmvEntityWithRel(struct nodeRel* nodo, struct relation dato){
         pretemp -> next = temp -> next;
         free(temp);
     }
-}
-
-void rmvEntityWithName(struct nodeRel *nodo, char nome[15]){
-        if (nodo != NULL)
-        {
-            rmvEntityWithName(nodo -> left, nome);
-            struct relation *temp = &nodo -> relation;
-            struct relation *pretemp = NULL;
-            while (strcmp(temp -> from, nome) != 0 || strcmp(temp -> to, nome) != 0){
-                if(temp == NULL){
-                    break;
-                }
-                pretemp = temp;
-                temp = temp -> next;
-            }
-            if (pretemp == NULL){
-                struct relation delete = nodo -> relation;
-                nodo -> relation = *nodo -> relation.next;
-                free (&delete);
-            }
-            if (temp != NULL && pretemp != NULL){
-                pretemp -> next = temp -> next;
-                free(temp);
-            }
-            rmvEntityWithName(nodo ->right, nome);
-        }
 }
 
 struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation dato){
@@ -204,9 +199,7 @@ struct nodeRel* minRelValueNode(struct nodeRel* node)
 
 struct nodeRel* rmvRelNode(struct nodeRel* root, struct relation dato){
     
-    if (root == NULL){
-        return root;            // in questo caso non cancello nulla
-    }
+    if (root == NULL) return root;            // in questo caso non cancello nulla
     if (strcmp(root -> relation.name, dato.name) > 0){
         root -> left = rmvRelNode(root -> left, dato);
     }else if (strcmp(root -> relation.name, dato.name) < 0){
@@ -236,17 +229,11 @@ struct nodeRel* rmvRelNode(struct nodeRel* root, struct relation dato){
     }
     return root;
 }
-
-void usrInOrder(struct node *root)
-{
-    if (root != NULL)
-    {
-        usrInOrder(root->left);
-        printf("%s ", root->data.name);
-        usrInOrder(root->right);
-    }
+struct nodeRel* searchRel (struct nodeRel *root, char name[15]){
+    if (root == NULL || strcmp(root ->relation.name, name) == 0) return root;
+    if (strcmp(root -> relation.name, name) > 0) return searchRel(root -> left, name);
+    return searchRel(root ->right, name);
 }
-
 void relInOrder(struct nodeRel *root)
 {
     if (root != NULL)
@@ -254,19 +241,58 @@ void relInOrder(struct nodeRel *root)
         relInOrder(root->left);
         printf("%s ", root->relation.name);
         printf("%s ", root->relation.from);
-        printf("%s ", root->relation.to);
+        printf("%s | ", root->relation.to);
+        struct relation *temp = root -> relation.next;
+        while (temp != NULL){
+            printf("%s ", temp -> name);
+            printf("%s ", temp -> from);
+            printf("%s | ", temp -> to);
+            temp = temp -> next;
+        }
         relInOrder(root->right);
     }
 }
 
+void rmvEntityWithName(struct nodeRel *nodo, char nome[15]){
+    if (nodo != NULL)
+    {
+        rmvEntityWithName(nodo -> left, nome);
+        struct relation *temp = &nodo -> relation;
+        struct relation *pretemp = NULL;
+        while (strcmp(temp -> from, nome) != 0 && strcmp(temp -> to, nome) != 0){
+            if(temp == NULL){
+                break;
+            }
+            pretemp = temp;
+            temp = temp -> next;
+        }
+        if (pretemp == NULL){
+            if(nodo -> relation.next != NULL){
+                nodo -> relation = *nodo -> relation.next;
+                free (temp);
+            }else{
+                relRoot = rmvRelNode(relRoot, nodo -> relation);
+            }
+        }
+        if (temp != NULL && pretemp != NULL){
+            pretemp -> next = temp -> next;
+            free(temp);
+        }
+        rmvEntityWithName(nodo -> right, nome);
+    }
+}
+
 //-------------------------------------------------------------------------------------------------//
+
 int main(int argc, const char * argv[]) {
     char a[15], b[15], c[15], d[15];
     short j = 0;
-    struct node *usrRoot = NULL;
-    struct nodeRel *relRoot = NULL;
     do {
-        printf("scrivi ");
+        for (short i = 0; i < 15; i ++) a[i] = '\0';
+        for (short i = 0; i < 15; i ++) b[i] = '\0';
+        for (short i = 0; i < 15; i ++) c[i] = '\0';
+        for (short i = 0; i < 15; i ++) d[i] = '\0';
+        printf("pronto: ");
         for (short i = 0; i < 15; i++){
             char temp = getchar_unlocked();
             if (temp == '\n'){
@@ -319,30 +345,25 @@ int main(int argc, const char * argv[]) {
             struct uuser temp;
             strcpy(temp.name, b);
             usrRoot = rmvusrNode(usrRoot, temp);
-            printf("rimosso %s all'albero \n", b);
-            //TODO eliminare tutte le relazioni
+            rmvEntityWithName(relRoot, b);
         }else if(strcmp(a, "addrel") == 0){
-            struct relation temp;
-            strcpy(temp.name, b);
-            strcpy(temp.from, c);
-            strcpy(temp.to, d);
-            relRoot = addRelNode(relRoot, temp);
-            printf("ora %s è %s di %s", d, b, c);
+            if (searchUser(usrRoot, c) != NULL && searchUser(usrRoot, d) != NULL){
+                struct relation temp;
+                strcpy(temp.name, b);
+                strcpy(temp.from, c);
+                strcpy(temp.to, d);
+                relRoot = addRelNode(relRoot, temp);
+                printf("ora %s è %s di %s\n", d, b, c);
+            }else printf("404: entity not found\n");
         }else if(strcmp(a, "delrel") == 0){
             
         }else if(strcmp(a, "report") == 0){
-            // usrInOrder(usrRoot);
+            usrInOrder(usrRoot);
+            printf("\n");
             relInOrder(relRoot);
         }
- 
-        for (short i = 0; i < 15; i ++) a[i] = '\0';
-        for (short i = 0; i < 15; i ++) b[i] = '\0';
-        for (short i = 0; i < 15; i ++) c[i] = '\0';
-        for (short i = 0; i < 15; i ++) d[i] = '\0';
         
     } while ((strcmp(a, "end") != 0));
-    
     printf("Hello, World!\n");
-    
     return 0;
 }
