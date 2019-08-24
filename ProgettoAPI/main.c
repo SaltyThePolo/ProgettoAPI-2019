@@ -1,8 +1,8 @@
 //  main.c
 //  ProgettoAPI
 //
-//  Created by Mattia Riviera on 17/08/2019.
-//  Copyright © 2019 Mattia Riviera. All rights reserved.
+//  Created by Mattia Riviera on 17/08/3019.
+//  Copyright © 3019 Mattia Riviera. All rights reserved.
 //
 
 #include <stdio.h>
@@ -11,9 +11,10 @@
 
 struct node *usrRoot = NULL;
 struct nodeRel *relRoot = NULL;
+short doppio = 0;
 
 struct uuser {
-    char name[15];
+    char name[30];
     int count;
 };
 
@@ -104,7 +105,7 @@ void usrInOrder(struct node *root)
         usrInOrder(root->right);
     }
 }
-struct node* searchUser (struct node *root, char name[15]){
+struct node* searchUser (struct node *root, char name[30]){
     if (root == NULL|| strcmp(root ->data.name, name) == 0) return root;
     if (strcmp(root -> data.name, name) > 0) return searchUser(root -> left, name);
         return searchUser(root ->right, name);
@@ -113,7 +114,7 @@ struct node* searchUser (struct node *root, char name[15]){
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
 struct nodeRel{
-    char nameRel[15];
+    char nameRel[30];
     struct nodeReceiver *nodeReceiver;
     struct nodeMax *nodeMax;
     struct nodeRel *father;
@@ -122,7 +123,8 @@ struct nodeRel{
 };
 
 struct nodeReceiver {
-    char nameRec[15];
+    char nameRec[30];
+    short qty;
     struct nodeSender *nodeSender;
     struct nodeReceiver *father;
     struct nodeReceiver *left;
@@ -130,24 +132,17 @@ struct nodeReceiver {
 };
 
 struct nodeSender{
-    char nameSen[15];
+    char nameSen[30];
     struct nodeSender *father;
     struct nodeSender *left;
     struct nodeSender *right;
 };
 
-struct nodeMax{
-    char name[15];
-    int qty;
-    struct nodeMax *father;
-    struct nodeMax *left;
-    struct nodeMax *right;
-};
 
 struct relation{
-    char name[15];
-    char from[15];
-    char to[15];
+    char name[30];
+    char from[30];
+    char to[30];
 };
 
 //--------------------------------------------------------------------------------------------------------------
@@ -155,19 +150,24 @@ struct relation{
 struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato);
 struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato);
 struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato);
-struct nodeMax* addMaxNode(struct nodeMax *nodo, struct relation *dato);
 
 struct nodeRel *createRelNode(struct relation *relation);
 struct nodeReceiver *createRecNode(struct relation *relation);
 struct nodeSender *createSenNode(struct relation *relation);
-struct nodeMax *createMaxNode(struct relation *relation);
+
+void reportRel(struct nodeRel *nodo);
+short reportRec(struct nodeReceiver *nodo);
+
+short findMax(struct nodeReceiver *nodo, short i);
 
 
+/*                  roba della vecchia struttura dati
+ 
 struct nodeRel* minRelValueNode(struct nodeRel* node)
 {
     struct nodeRel* current = node;
     
-    /* loop down to find the leftmost leaf */
+    // loop down to find the leftmost leaf
     while (current && current->left != NULL)
         current = current->left;
     
@@ -175,7 +175,7 @@ struct nodeRel* minRelValueNode(struct nodeRel* node)
 }
 
 
-/*struct nodeRel* rmvRelNode(struct nodeRel* root, struct relation *dato){
+struct nodeRel* rmvRelNode(struct nodeRel* root, struct relation *dato){
     
     if (root == NULL) return root;            // in questo caso non cancello nulla
     if (strcmp(root -> relation -> name, dato -> name) > 0){
@@ -212,15 +212,14 @@ struct nodeRel* minRelValueNode(struct nodeRel* node)
 //-------------------------------------------------------------------------------------------------//
 
 int main(int argc, const char * argv[]) {
-    char a[15], b[15], c[15], d[15];
+    char a[30], b[30], c[30], d[30];
     short j = 0;
     do {
-        for (short i = 0; i < 15; i ++) a[i] = '\0';
-        for (short i = 0; i < 15; i ++) b[i] = '\0';
-        for (short i = 0; i < 15; i ++) c[i] = '\0';
-        for (short i = 0; i < 15; i ++) d[i] = '\0';
-        printf("pronto: ");
-        for (short i = 0; i < 15; i++){
+        for (short i = 0; i < 30; i ++) a[i] = '\0';
+        for (short i = 0; i < 30; i ++) b[i] = '\0';
+        for (short i = 0; i < 30; i ++) c[i] = '\0';
+        for (short i = 0; i < 30; i ++) d[i] = '\0';
+        for (short i = 0; i < 30; i++){
             char temp = getchar_unlocked();
             if (temp == '\n'){
                 j = 1;
@@ -231,7 +230,7 @@ int main(int argc, const char * argv[]) {
         }
         
         if ( j == 0){
-            for (short i = 0; i < 15; i++){
+            for (short i = 0; i < 30; i++){
                 char temp = getchar_unlocked();
                 if (temp == ' ' || temp == EOF) break;
                 if (temp == '\n') {
@@ -243,7 +242,7 @@ int main(int argc, const char * argv[]) {
         }
         
         if ( j == 0){
-            for (short i = 0; i < 15; i++){
+            for (short i = 0; i < 30; i++){
                 char temp = getchar_unlocked();
                 if (temp == ' ' || temp == EOF) break;
                 if (temp == '\n') {
@@ -255,7 +254,7 @@ int main(int argc, const char * argv[]) {
         }
         
         if( j == 0){
-            for (short i = 0; i < 15; i++){
+            for (short i = 0; i < 30; i++){
                 char temp = getchar_unlocked();
                 if (temp == EOF || temp == '\n') break;
                 d[i] = temp;
@@ -267,13 +266,12 @@ int main(int argc, const char * argv[]) {
             struct uuser temp;
             strcpy(temp.name, b);
             usrRoot = addUuserNode(usrRoot, temp);
-            printf("aggiunto %s all'albero \n", b);
         }else if(strcmp(a, "delent") == 0){
             struct uuser temp;
             strcpy(temp.name, b);
             usrRoot = rmvusrNode(usrRoot, temp);
         }else if(strcmp(a, "addrel") == 0){
-            if (searchUser(usrRoot, c) != NULL && searchUser(usrRoot, d) != NULL){
+            if (searchUser(usrRoot, b) != NULL && searchUser(usrRoot, c) != NULL){
                 struct relation *temp = malloc(sizeof(struct relation));
                 strcpy(temp -> name, d);
                 strcpy(temp -> from, b);
@@ -284,7 +282,11 @@ int main(int argc, const char * argv[]) {
         }else if(strcmp(a, "delrel") == 0){
 
         }else if(strcmp(a, "report") == 0){
-            
+            if(relRoot == NULL) fputs("none\n", stdout);
+            else {
+                reportRel(relRoot);
+                fputs("\n", stdout);
+            }
         }
         
     } while ((strcmp(a, "end") != 0));
@@ -322,6 +324,11 @@ struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato
     }
     if(strcmp(nodo -> nameRec, dato -> to) == 0){
         addSenNode(nodo -> nodeSender, dato);
+        if(doppio == 0){
+            nodo -> qty ++;
+        }else{
+            doppio = 0;
+        }
     }
     return nodo;
 }
@@ -336,34 +343,25 @@ struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato){
     if(strcmp(nodo -> nameSen, dato -> from) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
         nodo -> right = addSenNode(nodo -> right, dato);
     }
+    if(strcmp(nodo -> nameSen, dato -> from) == 0){
+        doppio = 1;
+    }
     return nodo;
 }
 
-struct nodeMax* addMaxNode(struct nodeMax *nodo, struct relation *dato){
-    if (nodo == NULL){
-        return createMaxNode(dato);
-    }
-    if(strcmp(nodo -> name, dato -> to) > 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
-        nodo -> left  = addMaxNode(nodo -> left, dato);
-    }
-    if(strcmp(nodo -> name, dato -> to) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
-        nodo -> right = addMaxNode(nodo -> right, dato);
-    }
-    return nodo;
-}
 
 struct nodeRel *createRelNode(struct relation *relation){
     struct nodeRel *temp = malloc(sizeof(struct nodeRel));
     strcpy(temp -> nameRel, relation -> name);
     temp -> left = temp -> right = NULL;
     temp -> nodeReceiver = createRecNode(relation);
-    temp -> nodeMax = createMaxNode(relation);
     return temp;
 }
 
 struct nodeReceiver *createRecNode(struct relation *relation){
     struct nodeReceiver *temp = malloc(sizeof(struct nodeReceiver));
     strcpy(temp -> nameRec, relation -> to);
+    temp -> qty = 1;
     temp -> left = temp -> right = NULL;
     temp -> nodeSender = createSenNode(relation);
     return temp;
@@ -376,10 +374,39 @@ struct nodeSender *createSenNode(struct relation *relation){
     return temp;
 }
 
-struct nodeMax *createMaxNode(struct relation *relation){
-    struct nodeMax *temp = malloc(sizeof(struct nodeMax));
-    strcpy(temp -> name, relation -> to);
-    temp -> qty = 1;
-    temp -> left = temp -> right = NULL;
-    return temp;
+void reportRel(struct nodeRel *nodo){
+    if (nodo != NULL)
+    {
+        if (nodo -> left != NULL) reportRel(nodo->left);
+        
+        fputs(nodo -> nameRel, stdout);
+        fputs(" ", stdout);
+        short i = reportRec(nodo -> nodeReceiver);
+        printf("%d; ", i);
+        if (nodo -> right != NULL) reportRel(nodo->right);
+    }
+}
+
+short reportRec(struct nodeReceiver *nodo){
+    short i = 0;
+    if (nodo != NULL)
+    {
+        if (nodo -> left != NULL) reportRec(nodo -> left);
+        i = findMax (nodo, 0);
+        if (nodo -> qty == i){
+            fputs(nodo -> nameRec, stdout);
+            fputs(" ", stdout);
+        }
+        if (nodo -> right != NULL) reportRec(nodo -> right);
+    }
+    return i;
+}
+
+short findMax(struct nodeReceiver *nodo, short i){
+    if(nodo != NULL){
+        if (nodo -> left != NULL) i = findMax(nodo -> left, i);
+        if (nodo -> qty > i) i = nodo -> qty;
+        if (nodo -> right != NULL) i = findMax(nodo -> right, i);
+    }
+    return i;
 }
