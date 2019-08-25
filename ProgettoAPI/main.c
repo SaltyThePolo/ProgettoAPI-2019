@@ -15,7 +15,6 @@ short doppio = 0;
 
 struct uuser {
     char name[30];
-    int count;
 };
 
 
@@ -155,59 +154,16 @@ struct nodeRel *createRelNode(struct relation *relation);
 struct nodeReceiver *createRecNode(struct relation *relation);
 struct nodeSender *createSenNode(struct relation *relation);
 
+struct nodeRel* minRelValueNode(struct nodeRel* node);
+struct nodeReceiver* minRecValueNode(struct nodeReceiver* node);
+struct nodeSender* minSenValueNode(struct nodeSender* node);
+
 void reportRel(struct nodeRel *nodo);
-short reportRec(struct nodeReceiver *nodo);
+void reportRec(struct nodeReceiver *nodo, short i);
 
 short findMax(struct nodeReceiver *nodo, short i);
 
 
-/*                  roba della vecchia struttura dati
- 
-struct nodeRel* minRelValueNode(struct nodeRel* node)
-{
-    struct nodeRel* current = node;
-    
-    // loop down to find the leftmost leaf
-    while (current && current->left != NULL)
-        current = current->left;
-    
-    return current;
-}
-
-
-struct nodeRel* rmvRelNode(struct nodeRel* root, struct relation *dato){
-    
-    if (root == NULL) return root;            // in questo caso non cancello nulla
-    if (strcmp(root -> relation -> name, dato -> name) > 0){
-        root -> left = rmvRelNode(root -> left, dato);
-    }else if (strcmp(root -> relation -> name, dato -> name) < 0){
-        root -> right = rmvRelNode(root ->right, dato);
-    }else{ // sono nel posto giusto
-        
-        // node with only one child or no child
-        if (root->left == NULL)
-        {
-            struct nodeRel *temp = root->right;
-            free(root);
-            return temp;
-        }
-        else if (root->right == NULL)
-        {
-            struct nodeRel *temp = root->left;
-            free(root);
-            return temp;
-        }
-        // node with two children: Get the inorder successor (smallest
-        // in the right subtree)
-        struct nodeRel* temp = minRelValueNode(root->right);
-        // Copy the inorder successor's content to this node
-        root->relation = temp->relation;
-        // Delete the inorder successor
-        root->right = rmvRelNode(root->right, temp->relation);
-    }
-    return root;
-}
- */
 
 //-------------------------------------------------------------------------------------------------//
 
@@ -374,6 +330,37 @@ struct nodeSender *createSenNode(struct relation *relation){
     return temp;
 }
 
+
+
+struct nodeRel* minRelValueNode(struct nodeRel* node)
+{
+    struct nodeRel* current = node;
+    
+    // loop down to find the leftmost leaf
+    while (current && current->left != NULL)
+        current = current->left;
+    
+    return current;
+}
+
+struct nodeReceiver* minRecValueNode(struct nodeReceiver* node){
+    struct nodeReceiver* current = node;
+    // loop down to find the leftmost leaf
+    while (current && current->left != NULL)
+        current = current->left;
+    return current;
+}
+
+struct nodeSender* minSenValueNode(struct nodeSender* node){
+    struct nodeSender* current = node;
+    // loop down to find the leftmost leaf
+    while (current && current->left != NULL)
+        current = current->left;
+    return current;
+}
+
+
+
 void reportRel(struct nodeRel *nodo){
     if (nodo != NULL)
     {
@@ -381,26 +368,26 @@ void reportRel(struct nodeRel *nodo){
         
         fputs(nodo -> nameRel, stdout);
         fputs(" ", stdout);
-        short i = reportRec(nodo -> nodeReceiver);
+        short i = findMax (nodo -> nodeReceiver, 0);
+        reportRec(nodo -> nodeReceiver, i);
         printf("%d; ", i);
         if (nodo -> right != NULL) reportRel(nodo->right);
     }
 }
 
-short reportRec(struct nodeReceiver *nodo){
-    short i = 0;
+void reportRec(struct nodeReceiver *nodo, short i){
     if (nodo != NULL)
     {
-        if (nodo -> left != NULL) reportRec(nodo -> left);
-        i = findMax (nodo, 0);
+        if (nodo -> left != NULL) reportRec(nodo -> left, i);
         if (nodo -> qty == i){
             fputs(nodo -> nameRec, stdout);
             fputs(" ", stdout);
         }
-        if (nodo -> right != NULL) reportRec(nodo -> right);
+        if (nodo -> right != NULL) reportRec(nodo -> right, i);
     }
-    return i;
 }
+
+
 
 short findMax(struct nodeReceiver *nodo, short i){
     if(nodo != NULL){
@@ -410,3 +397,4 @@ short findMax(struct nodeReceiver *nodo, short i){
     }
     return i;
 }
+
