@@ -13,36 +13,31 @@ struct node *usrRoot = NULL;
 struct nodeRel *relRoot = NULL;
 short doppio = 0;
 
-struct uuser {
-    char name[30];
-};
-
 
 
  // inizio con la struttura dell'albero entità
 struct node{
-    struct uuser data;
-    struct node *father;
+    char nome[30];
     struct node *left;
     struct node *right;
 };
 
-struct node *createUsrNode(struct uuser data){
+struct node *createUsrNode(char nome[30]){
     struct node *temp =  (struct node *)malloc(sizeof(struct node));
-    temp->data = data;
+    strcpy(temp->nome, nome);
     temp->left = temp->right = NULL;
     return temp;
 }
 
-struct node* addUuserNode(struct node* node, struct uuser data){
+struct node* addUuserNode(struct node* node, char nome [30]){
     if (node == NULL){
-        return createUsrNode(data);
+        return createUsrNode(nome);
     }
-    if(strcmp(node -> data.name, data.name) > 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
-        node -> left  = addUuserNode(node -> left, data);
+    if(strcmp(node -> nome, nome) > 0){      // se è maggiore fa la funzione ricorsiva sul figlio a sx
+        node -> left  = addUuserNode(node -> left, nome);
     }
-    if(strcmp(node -> data.name, data.name) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
-        node -> right = addUuserNode(node -> right, data);
+    if(strcmp(node -> nome, nome) < 0){     // se è minore fa la funzione ricorsiva sul figlio a dx
+        node -> right = addUuserNode(node -> right, nome);
     }
     return node;
 }
@@ -58,15 +53,15 @@ struct node* minUsrValueNode(struct node* node)
     return current;
 }
 
-struct node* rmvusrNode(struct node* root, struct uuser data){
+struct node* rmvusrNode(struct node* root,char nome[30]){
     
     if (root == NULL){
         return root;            // in questo caso non cancello nulla
     }
-    if (strcmp(root -> data.name, data.name) > 0){
-        root -> left = rmvusrNode(root -> left, data);
-    }else if (strcmp(root -> data.name, data.name) < 0){
-        root -> right = rmvusrNode(root ->right, data);
+    if (strcmp(root -> nome, nome) > 0){
+        root -> left = rmvusrNode(root -> left, nome);
+    }else if (strcmp(root -> nome, nome) < 0){
+        root -> right = rmvusrNode(root ->right, nome);
     }else{ // sono nel posto giusto
         // node with only one child or no child
         if (root->left == NULL)
@@ -86,10 +81,10 @@ struct node* rmvusrNode(struct node* root, struct uuser data){
         struct node* temp = minUsrValueNode(root->right);
         
         // Copy the inorder successor's content to this node
-        root->data = temp->data;
+        strcpy(root->nome, temp->nome);
         
         // Delete the inorder successor
-        root->right = rmvusrNode(root->right, temp->data);
+        root->right = rmvusrNode(root->right, temp->nome);
     }
     return root;
 }
@@ -100,14 +95,14 @@ void usrInOrder(struct node *root)
     if (root != NULL)
     {
         usrInOrder(root->left);
-        printf("%s ", root->data.name);
+        printf("%s ", root->nome);
         usrInOrder(root->right);
     }
 }
-struct node* searchUser (struct node *root, char name[30]){
-    if (root == NULL|| strcmp(root ->data.name, name) == 0) return root;
-    if (strcmp(root -> data.name, name) > 0) return searchUser(root -> left, name);
-        return searchUser(root ->right, name);
+struct node* searchUser (struct node *root, char nome[30]){
+    if (root == NULL|| strcmp(root ->nome, nome) == 0) return root;
+    if (strcmp(root -> nome, nome) > 0) return searchUser(root -> left, nome);
+        return searchUser(root ->right, nome);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -115,8 +110,6 @@ struct node* searchUser (struct node *root, char name[30]){
 struct nodeRel{
     char nameRel[30];
     struct nodeReceiver *nodeReceiver;
-    struct nodeMax *nodeMax;
-    struct nodeRel *father;
     struct nodeRel *left;
     struct nodeRel *right;
 };
@@ -125,14 +118,12 @@ struct nodeReceiver {
     char nameRec[30];
     short qty;
     struct nodeSender *nodeSender;
-    struct nodeReceiver *father;
     struct nodeReceiver *left;
     struct nodeReceiver *right;
 };
 
 struct nodeSender{
     char nameSen[30];
-    struct nodeSender *father;
     struct nodeSender *left;
     struct nodeSender *right;
 };
@@ -158,10 +149,22 @@ struct nodeRel* minRelValueNode(struct nodeRel* node);
 struct nodeReceiver* minRecValueNode(struct nodeReceiver* node);
 struct nodeSender* minSenValueNode(struct nodeSender* node);
 
+struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel *nodo, struct relation *rel);
+struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* nodo, struct relation *rel);
+struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[30]);
+
+struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeReceiver *nodo);
+struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo);
+
+struct nodeRel* scanRel (struct nodeRel *root, char dato[30]);
+struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]);
+
 void reportRel(struct nodeRel *nodo);
 void reportRec(struct nodeReceiver *nodo, short i);
 
 short findMax(struct nodeReceiver *nodo, short i);
+
+void delSenTree(struct nodeSender *root);
 
 
 
@@ -219,13 +222,10 @@ int main(int argc, const char * argv[]) {
         j = 0;
 
         if (strcmp(a, "addent") == 0) {
-            struct uuser temp;
-            strcpy(temp.name, b);
-            usrRoot = addUuserNode(usrRoot, temp);
+            usrRoot = addUuserNode(usrRoot, b);
         }else if(strcmp(a, "delent") == 0){
-            struct uuser temp;
-            strcpy(temp.name, b);
-            usrRoot = rmvusrNode(usrRoot, temp);
+            usrRoot = rmvusrNode(usrRoot, b);
+            relRoot = scanRel(relRoot, b);
         }else if(strcmp(a, "addrel") == 0){
             if (searchUser(usrRoot, b) != NULL && searchUser(usrRoot, c) != NULL){
                 struct relation *temp = malloc(sizeof(struct relation));
@@ -236,7 +236,15 @@ int main(int argc, const char * argv[]) {
                 free(temp);
             }
         }else if(strcmp(a, "delrel") == 0){
-
+            if (searchUser(usrRoot, b) != NULL && searchUser(usrRoot, c) != NULL){
+                struct relation *temp = malloc(sizeof(struct relation));
+                strcpy(temp -> name, d);
+                strcpy(temp -> from, b);
+                strcpy(temp -> to, c);
+                relRoot = rmvRelNode(relRoot, NULL, temp);
+                free(temp);
+            }
+            
         }else if(strcmp(a, "report") == 0){
             if(relRoot == NULL) fputs("none\n", stdout);
             else {
@@ -360,6 +368,218 @@ struct nodeSender* minSenValueNode(struct nodeSender* node){
 }
 
 
+ 
+//Given a binary search tree and a key, this function deletes the key
+//and returns the new root
+struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel* nodo, struct relation *rel){
+    if (nodo == NULL) {
+        // base case
+        if (root == NULL) return root;
+        
+        // If the key to be deleted is smaller than the root's key,
+        // then it lies in left subtree
+        if (strcmp(rel -> name, root -> nameRel) < 0 )
+            root->left = rmvRelNode(root->left, nodo, rel);
+        
+        // If the key to be deleted is greater than the root's key,
+        // then it lies in right subtree
+        else if (strcmp(rel -> name, root -> nameRel) > 0 )
+            root->right = rmvRelNode(root->right, nodo, rel);
+        
+        // if key is same as root's key, then This is the node
+        // to be deleted
+        else if(root != NULL){
+            root ->nodeReceiver = rmvRecNode(root -> nodeReceiver, NULL, rel);
+            if ( root -> nodeReceiver == NULL){
+                // node with only one child or no child
+                if (root->left == NULL)
+                {
+                    struct nodeRel *temp = root->right;
+                    free(root);
+                    return temp;
+                }
+                else if (root->right == NULL)
+                {
+                    struct nodeRel *temp = root->left;
+                    free(root);
+                    return temp;
+                }
+                
+                // node with two children: Get the inorder successor (smallest
+                // in the right subtree)
+                struct nodeRel* temp = minRelValueNode(root->right);
+                
+                // Copy the inorder successor's content to this node
+                strcpy(root -> nameRel, temp -> nameRel);
+                root -> nodeReceiver = temp -> nodeReceiver;
+                
+                // Delete the inorder successor
+                root -> right = rmvRelNode(root -> right, temp, rel);
+            }
+        }
+        return root;
+    } else {
+        // base case
+        if (root == NULL) return root;
+        
+        // If the key to be deleted is smaller than the root's key,
+        // then it lies in left subtree
+        if (strcmp(nodo -> nameRel, root -> nameRel) < 0 )
+            root->left = rmvRelNode(root->left, nodo, rel);
+        
+        // If the key to be deleted is greater than the root's key,
+        // then it lies in right subtree
+        else if (strcmp(nodo -> nameRel, root -> nameRel) > 0)
+            root->right = rmvRelNode(root->right, nodo, rel);
+        
+        // if key is same as root's key, then This is the node
+        // to be deleted
+        else{
+            // node with only one child or no child
+            if (root->left == NULL){
+                struct nodeRel *temp = root->right;
+                free(root);
+                return temp;
+            }else if (root->right == NULL){
+                struct nodeRel *temp = root->left;
+                free(root);
+                return temp;
+            }
+        }
+    }
+    return root;
+}
+
+//Given a binary search tree and a key, this function deletes the key
+//and returns the new root
+struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* nodo, struct relation *rel){
+    if (nodo == NULL) {
+        // base case
+        if (root == NULL) return root;
+        // If the key to be deleted is smaller than the root's key,
+        // then it lies in left subtree
+        if (strcmp(rel -> to, root -> nameRec) < 0 ) root->left = rmvRecNode(root->left, nodo, rel);
+        
+        // If the key to be deleted is greater than the root's key,
+        // then it lies in right subtree
+        else if (strcmp(rel -> to, root -> nameRec) > 0) root->right = rmvRecNode(root->right, nodo, rel);
+        
+        // if key is same as root's key, then This is the node
+        // to be deleted
+        else if(root != NULL){
+            root -> nodeSender = rmvSenNode( root -> nodeSender, rel -> from);
+            if (doppio == 1){
+                root -> qty --;
+                doppio = 0;
+            }
+            if ( root -> nodeSender == NULL){
+                // node with only one child or no child
+                if (root->left == NULL){
+                    struct nodeReceiver *temp = root->right;
+                    free(root);
+                    return temp;
+                }
+                else if (root->right == NULL){
+                    struct nodeReceiver *temp = root->left;
+                    free(root);
+                    return temp;
+                }
+                
+                // node with two children: Get the inorder successor (smallest
+                // in the right subtree)
+                struct nodeReceiver* temp = minRecValueNode(root->right);
+                
+                // Copy the inorder successor's content to this node
+                strcpy(root -> nameRec, temp -> nameRec);
+                root -> qty = temp -> qty;
+                root -> nodeSender = temp -> nodeSender;
+                
+                // Delete the inorder successor
+                root -> right = rmvRecNode(root -> right, temp, rel);
+            }
+        }
+        return root;
+    } else {
+        // base case
+        if (root == NULL) return root;
+        
+        // If the key to be deleted is smaller than the root's key,
+        // then it lies in left subtree
+        if (strcmp(nodo -> nameRec, root -> nameRec) < 0 )
+            root->left = rmvRecNode(root->left, nodo, rel);
+        
+        // If the key to be deleted is greater than the root's key,
+        // then it lies in right subtree
+        else if (strcmp(nodo -> nameRec, root -> nameRec) > 0)
+            root->right = rmvRecNode(root->right, nodo, rel);
+        
+        // if key is same as root's key, then This is the node
+        // to be deleted
+        else{
+            // node with only one child or no child
+            if (root->left == NULL){
+                struct nodeReceiver *temp = root->right;
+                free(root);
+                return temp;
+            }else if (root->right == NULL){
+                struct nodeReceiver *temp = root->left;
+                free(root);
+                return temp;
+            }
+        }
+    }
+    return root;
+}
+
+/* Given a binary search tree and a key, this function deletes the key
+ and returns the new root */
+struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[30]){
+    // base case
+    if (root == NULL) return root;
+    
+    // If the key to be deleted is smaller than the root's key,
+    // then it lies in left subtree
+    if (strcmp(dato, root -> nameSen) < 0)
+        root->left = rmvSenNode(root->left, dato);
+    
+    // If the key to be deleted is greater than the root's key,
+    // then it lies in right subtree
+    else if (strcmp(dato, root -> nameSen) > 0)
+        root->right = rmvSenNode(root -> right, dato);
+    
+    // if key is same as root's key, then This is the node
+    // to be deleted
+    else
+    {
+        doppio = 1;
+        // node with only one child or no child
+        if (root->left == NULL)
+        {
+            struct nodeSender *temp = root -> right;
+            free(root);
+            return temp;
+        }
+        else if (root -> right == NULL)
+        {
+            struct nodeSender *temp = root -> left;
+            free(root);
+            return temp;
+        }
+        
+        // node with two children: Get the inorder successor (smallest
+        // in the right subtree)
+        struct nodeSender* temp = minSenValueNode(root -> right);
+        
+        // Copy the inorder successor's content to this node
+        strcpy(root -> nameSen, temp -> nameSen);
+        
+        // Delete the inorder successor
+        root -> right = rmvSenNode(root -> right, temp -> nameSen);
+    }
+    return root;
+}
+
+
 
 void reportRel(struct nodeRel *nodo){
     if (nodo != NULL)
@@ -398,3 +618,126 @@ short findMax(struct nodeReceiver *nodo, short i){
     return i;
 }
 
+
+
+void delSenTree(struct nodeSender *root){
+    if(root == NULL) return;
+    delSenTree(root -> left);
+    delSenTree(root -> right);
+    free(root);
+}
+
+
+
+struct nodeRel* scanRel (struct nodeRel *root, char dato[30]){
+    if( root -> left != NULL) root -> left = scanRel(root -> left, dato);
+    root -> nodeReceiver = scanRec(root -> nodeReceiver, dato);
+    if (root -> nodeReceiver -> nodeSender == NULL){
+        //TODO
+    }
+    
+    if( root -> right != NULL) root -> right = scanRel(root -> right, dato);
+    return root;
+}
+
+struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]){
+    if( root -> left != NULL) root -> left = scanRec(root -> left, dato);
+    
+    if(strcmp(root -> nameRec, dato) == 0) {
+        delSenTree(root -> nodeSender);
+    }
+    else {
+        root -> nodeSender = rmvSenNode(root -> nodeSender, dato);
+        if (doppio == 1) {
+            root -> qty --;
+            doppio = 0;
+        }
+    }
+    if( root -> right != NULL) root -> right = scanRec(root -> right, dato);
+    return root;
+}
+
+
+
+struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeReceiver *nodo){
+    // base case
+    if (root == NULL) return root;
+    
+    // If the key to be deleted is smaller than the root's key,
+    // then it lies in left subtree
+    if (strcmp(nodo -> nameRec, root -> nameRec) < 0 )
+        root->left = rmvEmptyRecNode(root->left, nodo);
+    
+    // If the key to be deleted is greater than the root's key,
+    // then it lies in right subtree
+    else if (strcmp(nodo -> nameRec, root -> nameRec) > 0)
+        root->right = rmvEmptyRecNode(root->right, nodo);
+    
+    // if key is same as root's key, then This is the node
+    // to be deleted
+    else{
+        // node with only one child or no child
+        if (root->left == NULL){
+            struct nodeReceiver *temp = root->right;
+            free(root);
+            return temp;
+        }else if (root->right == NULL){
+            struct nodeReceiver *temp = root->left;
+            free(root);
+            return temp;
+        }
+        // node with two children: Get the inorder successor (smallest
+        // in the right subtree)
+        struct nodeReceiver* temp = minRecValueNode(root->right);
+        
+        // Copy the inorder successor's content to this node
+        strcpy(root -> nameRec, temp -> nameRec);
+        root -> qty = temp -> qty;
+        root -> nodeSender = temp -> nodeSender;
+        
+        // Delete the inorder successor
+        root -> right = rmvEmptyRecNode(root -> right, temp);
+    }
+    return root;
+}
+
+struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo){
+    // base case
+    if (root == NULL) return root;
+    
+    // If the key to be deleted is smaller than the root's key,
+    // then it lies in left subtree
+    if (strcmp(nodo -> nameRel, root -> nameRel) < 0 )
+        root->left = rmvEmptyRelNode(root->left, nodo);
+    
+    // If the key to be deleted is greater than the root's key,
+    // then it lies in right subtree
+    else if (strcmp(nodo -> nameRel, root -> nameRel) > 0)
+        root->right = rmvEmptyRelNode(root->right, nodo);
+    
+    // if key is same as root's key, then This is the node
+    // to be deleted
+    else{
+        // node with only one child or no child
+        if (root->left == NULL){
+            struct nodeRel *temp = root->right;
+            free(root);
+            return temp;
+        }else if (root->right == NULL){
+            struct nodeRel *temp = root->left;
+            free(root);
+            return temp;
+        }
+        // node with two children: Get the inorder successor (smallest
+        // in the right subtree)
+        struct nodeRel* temp = minRelValueNode(root->right);
+        
+        // Copy the inorder successor's content to this node
+        strcpy(root -> nameRel, temp -> nameRel);
+        root -> nodeReceiver = temp -> nodeReceiver;
+        
+        // Delete the inorder successor
+        root -> right = rmvEmptyRelNode(root -> right, temp);
+    }
+    return root;
+}
