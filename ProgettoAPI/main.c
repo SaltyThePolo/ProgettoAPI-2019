@@ -1,8 +1,8 @@
 //  main.c
 //  ProgettoAPI
 //
-//  Created by Mattia Riviera on 17/08/3019.
-//  Copyright © 3019 Mattia Riviera. All rights reserved.
+//  Created by Mattia Riviera on 17/08/2019.
+//  Copyright © 2019 Mattia Riviera. All rights reserved.
 //
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 struct node *usrRoot = NULL;
 struct nodeRel *relRoot = NULL;
 short doppio = 0;
-
+struct nodeReceiver *receiverRoot = NULL;
 
 
  // inizio con la struttura dell'albero entità
@@ -164,7 +164,7 @@ void reportRec(struct nodeReceiver *nodo, short i);
 
 short findMax(struct nodeReceiver *nodo, short i);
 
-void delSenTree(struct nodeSender *root);
+void delSenTree(struct nodeSender **root);
 
 
 
@@ -224,8 +224,10 @@ int main(int argc, const char * argv[]) {
         if (strcmp(a, "addent") == 0) {
             usrRoot = addUuserNode(usrRoot, b);
         }else if(strcmp(a, "delent") == 0){
-            usrRoot = rmvusrNode(usrRoot, b);
-            relRoot = scanRel(relRoot, b);
+            if (searchUser(usrRoot, b) != NULL){
+                usrRoot = rmvusrNode(usrRoot, b);
+                relRoot = scanRel(relRoot, b);
+            }
         }else if(strcmp(a, "addrel") == 0){
             if (searchUser(usrRoot, b) != NULL && searchUser(usrRoot, c) != NULL){
                 struct relation *temp = malloc(sizeof(struct relation));
@@ -585,13 +587,12 @@ void reportRel(struct nodeRel *nodo){
     if (nodo != NULL)
     {
         if (nodo -> left != NULL) reportRel(nodo->left);
-        
+        if (nodo -> right != NULL) reportRel(nodo->right);
         fputs(nodo -> nameRel, stdout);
         fputs(" ", stdout);
         short i = findMax (nodo -> nodeReceiver, 0);
         reportRec(nodo -> nodeReceiver, i);
         printf("%d; ", i);
-        if (nodo -> right != NULL) reportRel(nodo->right);
     }
 }
 
@@ -620,40 +621,48 @@ short findMax(struct nodeReceiver *nodo, short i){
 
 
 
-void delSenTree(struct nodeSender *root){
-    if(root == NULL) return;
-    delSenTree(root -> left);
-    delSenTree(root -> right);
-    free(root);
+void delSenTree(struct nodeSender **root){
+    if(*root == NULL) return;
+    delSenTree(&((*root) -> left));
+    delSenTree(&((*root) -> right));
+    free(*root);
+    *root = NULL;
 }
 
 
 
 struct nodeRel* scanRel (struct nodeRel *root, char dato[30]){
-    if( root -> left != NULL) root -> left = scanRel(root -> left, dato);
-    root -> nodeReceiver = scanRec(root -> nodeReceiver, dato);
-    if (root -> nodeReceiver -> nodeSender == NULL){
-        //TODO
-    }
-    
-    if( root -> right != NULL) root -> right = scanRel(root -> right, dato);
+    if (root != NULL){
+        if( root -> left != NULL) root -> left = scanRel(root -> left, dato);
+        if( root -> right != NULL) root -> right = scanRel(root -> right, dato);
+        receiverRoot = root -> nodeReceiver;
+        root -> nodeReceiver = scanRec(root -> nodeReceiver, dato);
+        if ( root -> nodeReceiver == NULL) root = rmvEmptyRelNode(root, root);
+        }
     return root;
 }
 
 struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]){
-    if( root -> left != NULL) root -> left = scanRec(root -> left, dato);
     
-    if(strcmp(root -> nameRec, dato) == 0) {
-        delSenTree(root -> nodeSender);
-    }
-    else {
-        root -> nodeSender = rmvSenNode(root -> nodeSender, dato);
-        if (doppio == 1) {
-            root -> qty --;
-            doppio = 0;
+    if (root != NULL) {
+        if( root -> left != NULL) root -> left = scanRec(root -> left, dato);
+        if( root -> right != NULL) root -> right = scanRec(root -> right, dato);
+        
+        if(strcmp(root -> nameRec, dato) == 0) {
+            delSenTree(&(root -> nodeSender));
+            root = rmvEmptyRecNode(root, root); // problema qui, anche se root è un'altro nodo mi torna sempre la radice dell'albero
+            
         }
+        else {
+            root -> nodeSender = rmvSenNode(root -> nodeSender, dato);
+            if (doppio == 1) {
+                root -> qty --;
+                doppio = 0;
+            }
+            if (root -> nodeSender == NULL) root = rmvEmptyRecNode(root, root);
+        }
+
     }
-    if( root -> right != NULL) root -> right = scanRec(root -> right, dato);
     return root;
 }
 
