@@ -15,7 +15,7 @@ short doppio = 0;
 struct nodeReceiver *receiverRoot = NULL;
 
 
- // inizio con la struttura dell'albero entità
+// inizio con la struttura dell'albero entità
 struct node{
     char nome[30];
     struct node *left;
@@ -90,19 +90,10 @@ struct node* rmvusrNode(struct node* root,char nome[30]){
 }
 
 
-void usrInOrder(struct node *root)
-{
-    if (root != NULL)
-    {
-        usrInOrder(root->left);
-        printf("%s ", root->nome);
-        usrInOrder(root->right);
-    }
-}
 struct node* searchUser (struct node *root, char nome[30]){
     if (root == NULL|| strcmp(root ->nome, nome) == 0) return root;
     if (strcmp(root -> nome, nome) > 0) return searchUser(root -> left, nome);
-        return searchUser(root ->right, nome);
+    return searchUser(root ->right, nome);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -159,13 +150,15 @@ struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo);
 struct nodeRel* scanRel (struct nodeRel *root, char dato[30]);
 struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]);
 
-void reportRel(struct nodeRel *nodo);
+short reportRel(struct nodeRel *nodo, short i);
 void reportRec(struct nodeReceiver *nodo, short i);
 
 short findMax(struct nodeReceiver *nodo, short i);
 
 void delSenTree(struct nodeSender **root);
 
+//void getLine(char *in);//, FILE *fin
+//short program(char* string);
 
 
 //-------------------------------------------------------------------------------------------------//
@@ -220,7 +213,6 @@ int main(int argc, const char * argv[]) {
             }
         }
         j = 0;
-
         if (strcmp(a, "addent") == 0) {
             usrRoot = addUuserNode(usrRoot, b);
         }else if(strcmp(a, "delent") == 0){
@@ -250,7 +242,7 @@ int main(int argc, const char * argv[]) {
         }else if(strcmp(a, "report") == 0){
             if(relRoot == NULL) fputs("none\n", stdout);
             else {
-                reportRel(relRoot);
+                reportRel(relRoot, 0);
                 fputs("\n", stdout);
             }
         }
@@ -259,8 +251,135 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 
-    
+
 //---------------------------------------------------------------------------------
+/*
+ void getLine(char *in){ //, FILE *fin
+ short i = 0;
+ char a;
+ do{
+ a = fgetc(stdin);//fin
+ in[i] = a;
+ i++;
+ }while (a != '\n');
+ 
+ in[i-1] = '\0';
+ }
+ 
+ short program(char* string){
+ short i = 0, x = 0;
+ char temp[30];
+ 
+ while(string[i] != '\0' && string[x] != ' '){
+ temp[i] = string [x];
+ i++;
+ x++;
+ }
+ temp[i] = '\0';
+ i = 0;
+ x++;
+ if (strcmp(temp, "addent") == 0) {
+ while(string[x] != '\0' && string[x] != ' ' && string[x] != '\n'){
+ temp[i] = string [x];
+ i++;
+ x++;
+ }
+ temp[i] = '\0';
+ usrRoot = addUuserNode(usrRoot, temp);
+ return 1;
+ }else if(strcmp(temp, "delent") == 0){
+ while(string[x] != '\0' && string[x] != ' ' && string[x] != '\n'){
+ temp[i] = string [x];
+ i++;
+ x++;
+ }
+ if (searchUser(usrRoot, temp) != NULL){ //toglibile?
+ usrRoot = rmvusrNode(usrRoot, temp);
+ relRoot = scanRel(relRoot, temp);
+ }
+ 
+ 
+ }else if(strcmp(temp, "addrel") == 0){
+ char from[30], to[30], rel[30];
+ while(string[x] != ' '){
+ from[i] = string [x];
+ i++;
+ x++;
+ }
+ from[i] = '\0';
+ i=0;
+ x++;
+ while(string[x] != ' '){
+ to[i] = string [x];
+ i++;
+ x++;
+ }
+ to[i] = '\0';
+ i=0;
+ x++;
+ while(string[x] != '\0' && string[x] != ' ' && string[x] != '\n'){
+ rel[i] = string [x];
+ i++;
+ x++;
+ }
+ rel[i] = '\0';
+ 
+ if (searchUser(usrRoot, from) != NULL && searchUser(usrRoot, to) != NULL){
+ struct relation *temp = malloc(sizeof(struct relation));
+ strcpy(temp -> name, rel);
+ strcpy(temp -> from, from);
+ strcpy(temp -> to, to);
+ relRoot = addRelNode(relRoot, temp);
+ free(temp);
+ }
+ return 2;
+ 
+ }else if(strcmp(temp, "delrel") == 0){
+ char from[30], to[30], rel[30];
+ while(string[x] != ' '){
+ from[i] = string [x];
+ i++;
+ x++;
+ }
+ from[i] = '\0';
+ i=0;
+ x++;
+ while(string[x] != ' '){
+ to[i] = string [x];
+ i++;
+ x++;
+ }
+ to[i] = '\0';
+ i=0;
+ x++;
+ while(string[i] != '\0' && string[x] != ' ' && string[x] != '\n'){
+ rel[i] = string [x];
+ i++;
+ x++;
+ }
+ rel[i] = '\0';
+ if (searchUser(usrRoot, from) != NULL && searchUser(usrRoot, to) != NULL){
+ struct relation *temp = malloc(sizeof(struct relation));
+ strcpy(temp -> name, rel);
+ strcpy(temp -> from, from);
+ strcpy(temp -> to, to);
+ relRoot = rmvRelNode(relRoot, NULL, temp);
+ free(temp);
+ }
+ return 3;
+ }else if(strcmp(temp, "report") == 0){
+ if(relRoot == NULL) fputs("none\n", stdout);
+ else {
+ reportRel(relRoot, 0);
+ fputs("\n", stdout);
+ }
+ return 4;
+ }else if(strcmp(temp, "end") == 0){
+ return 100;
+ }
+ return 0;
+ }
+ */
 
 struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato){
     if (nodo == NULL){
@@ -370,7 +489,7 @@ struct nodeSender* minSenValueNode(struct nodeSender* node){
 }
 
 
- 
+
 //Given a binary search tree and a key, this function deletes the key
 //and returns the new root
 struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel* nodo, struct relation *rel){
@@ -583,17 +702,19 @@ struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[30]){
 
 
 
-void reportRel(struct nodeRel *nodo){
+short reportRel(struct nodeRel *nodo, short i){
     if (nodo != NULL)
     {
-        if (nodo -> left != NULL) reportRel(nodo->left);
-        if (nodo -> right != NULL) reportRel(nodo->right);
+        if (nodo -> left != NULL) i = reportRel(nodo->left, i);
+        if (i != 0) fputs(" ", stdout);
         fputs(nodo -> nameRel, stdout);
         fputs(" ", stdout);
-        short i = findMax (nodo -> nodeReceiver, 0);
+        i = findMax (nodo -> nodeReceiver, 0);
         reportRec(nodo -> nodeReceiver, i);
-        printf("%d; ", i);
+        printf("%d;", i);
+        if (nodo -> right != NULL) i = reportRel(nodo->right, i);
     }
+    return i;
 }
 
 void reportRec(struct nodeReceiver *nodo, short i){
@@ -638,7 +759,7 @@ struct nodeRel* scanRel (struct nodeRel *root, char dato[30]){
         receiverRoot = root -> nodeReceiver;
         root -> nodeReceiver = scanRec(root -> nodeReceiver, dato);
         if ( root -> nodeReceiver == NULL) root = rmvEmptyRelNode(root, root);
-        }
+    }
     return root;
 }
 
@@ -661,7 +782,7 @@ struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]){
             }
             if (root -> nodeSender == NULL) root = rmvEmptyRecNode(root, root);
         }
-
+        
     }
     return root;
 }
@@ -750,3 +871,4 @@ struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo){
     }
     return root;
 }
+
