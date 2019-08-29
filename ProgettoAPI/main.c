@@ -17,19 +17,19 @@ struct nodeReceiver *receiverRoot = NULL;
 
 // inizio con la struttura dell'albero entità
 struct node{
-    char nome[30];
+    char nome[35];
     struct node *left;
     struct node *right;
 };
 
-struct node *createUsrNode(char nome[30]){
+struct node *createUsrNode(char nome[35]){
     struct node *temp =  (struct node *)malloc(sizeof(struct node));
     strcpy(temp->nome, nome);
     temp->left = temp->right = NULL;
     return temp;
 }
 
-struct node* addUuserNode(struct node* node, char nome [30]){
+static inline struct node* addUuserNode(struct node* node, char nome [35]){
     if (node == NULL){
         return createUsrNode(nome);
     }
@@ -42,7 +42,7 @@ struct node* addUuserNode(struct node* node, char nome [30]){
     return node;
 }
 
-struct node* minUsrValueNode(struct node* node)
+static inline struct node* minUsrValueNode(struct node* node)
 {
     struct node* current = node;
     
@@ -53,7 +53,7 @@ struct node* minUsrValueNode(struct node* node)
     return current;
 }
 
-struct node* rmvusrNode(struct node* root,char nome[30]){
+static inline struct node* rmvusrNode(struct node* root,char nome[35]){
     
     if (root == NULL){
         return root;            // in questo caso non cancello nulla
@@ -90,7 +90,7 @@ struct node* rmvusrNode(struct node* root,char nome[30]){
 }
 
 
-struct node* searchUser (struct node *root, char nome[30]){
+static inline struct node* searchUser (struct node *root, char nome[35]){
     if (root == NULL|| strcmp(root ->nome, nome) == 0) return root;
     if (strcmp(root -> nome, nome) > 0) return searchUser(root -> left, nome);
     return searchUser(root ->right, nome);
@@ -99,14 +99,14 @@ struct node* searchUser (struct node *root, char nome[30]){
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
 struct nodeRel{
-    char nameRel[30];
+    char nameRel[35];
     struct nodeReceiver *nodeReceiver;
     struct nodeRel *left;
     struct nodeRel *right;
 };
 
 struct nodeReceiver {
-    char nameRec[30];
+    char nameRec[35];
     short qty;
     struct nodeSender *nodeSender;
     struct nodeReceiver *left;
@@ -114,48 +114,48 @@ struct nodeReceiver {
 };
 
 struct nodeSender{
-    char nameSen[30];
+    char nameSen[35];
     struct nodeSender *left;
     struct nodeSender *right;
 };
 
 
 struct relation{
-    char name[30];
-    char from[30];
-    char to[30];
+    char name[35];
+    char from[35];
+    char to[35];
 };
 
 //--------------------------------------------------------------------------------------------------------------
 //                                      PROTOTIPI
-struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato);
-struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato);
-struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato);
+static inline struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato);
+static inline struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato);
+static inline struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato);
 
-struct nodeRel *createRelNode(struct relation *relation);
-struct nodeReceiver *createRecNode(struct relation *relation);
-struct nodeSender *createSenNode(struct relation *relation);
+static inline struct nodeRel *createRelNode(struct relation *relation);
+static inline struct nodeReceiver *createRecNode(struct relation *relation);
+static inline struct nodeSender *createSenNode(struct relation *relation);
 
-struct nodeRel* minRelValueNode(struct nodeRel* node);
-struct nodeReceiver* minRecValueNode(struct nodeReceiver* node);
-struct nodeSender* minSenValueNode(struct nodeSender* node);
+static inline struct nodeRel* minRelValueNode(struct nodeRel* node);
+static inline struct nodeReceiver* minRecValueNode(struct nodeReceiver* node);
+static inline struct nodeSender* minSenValueNode(struct nodeSender* node);
 
-struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel *nodo, struct relation *rel);
-struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* nodo, struct relation *rel);
-struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[30]);
+static inline struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel *nodo, struct relation *rel);
+static inline struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* nodo, struct relation *rel);
+static inline struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[35]);
 
-struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeReceiver *nodo);
-struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo);
+static inline struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeReceiver *nodo);
+static inline struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo);
 
-struct nodeRel* scanRel (struct nodeRel *root, char dato[30]);
-struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]);
+static inline struct nodeRel* scanRel (struct nodeRel *root, char dato[35]);
+static inline struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[35]);
 
-short reportRel(struct nodeRel *nodo, short i);
-void reportRec(struct nodeReceiver *nodo, short i);
+static inline short reportRel(struct nodeRel *nodo, short i);
+static inline void reportRec(struct nodeReceiver *nodo, short i);
 
-short findMax(struct nodeReceiver *nodo, short i);
+static inline short findMax(struct nodeReceiver *nodo, short i);
 
-void delSenTree(struct nodeSender **root);
+static inline void delSenTree(struct nodeSender **root);
 
 //void getLine(char *in);//, FILE *fin
 //short program(char* string);
@@ -164,40 +164,55 @@ void delSenTree(struct nodeSender **root);
 //-------------------------------------------------------------------------------------------------//
 
 int main(int argc, const char * argv[]) {
-    char a[30], b[30], c[30], d[30];
+    char a[10], b[35], c[35], d[35];
     short j = 0;
+    /*
+     FILE *fin;
+     fin = fopen("batch5.2.in", "r");
+     if( fin == NULL){
+     fputs("can't open it!", stdout);
+     return 0;
+     }
+    */
     do {
-        for (short i = 0; i < 30; i ++) a[i] = '\0';
-        for (short i = 0; i < 30; i ++) b[i] = '\0';
-        for (short i = 0; i < 30; i ++) c[i] = '\0';
-        for (short i = 0; i < 30; i ++) d[i] = '\0';
-        for (short i = 0; i < 30; i++){
-            char temp = getchar_unlocked();
+        for (short i = 0; i < 10; i++){
+            char temp = fgetc(stdin);
             if (temp == '\n'){
                 j = 1;
+                a[i] = '\0';
                 break;
             }
-            if (temp == ' ' || temp == EOF ) break;
+            if (temp == ' ') {
+                a[i] = '\0';
+                break;
+            }
             a[i] = temp;
         }
         
         if ( j == 0){
-            for (short i = 0; i < 30; i++){
-                char temp = getchar_unlocked();
-                if (temp == ' ' || temp == EOF) break;
+            for (short i = 0; i < 35; i++){
+                char temp = fgetc(stdin);
+                if (temp == ' '){
+                    b[i] = '\0';
+                    break;
+                }
                 if (temp == '\n') {
+                    b[i] = '\0';
                     j = 1;
                     break;
                 }
                 b[i] = temp;
             }
         }
-        
         if ( j == 0){
-            for (short i = 0; i < 30; i++){
-                char temp = getchar_unlocked();
-                if (temp == ' ' || temp == EOF) break;
+            for (short i = 0; i < 35; i++){
+                char temp = fgetc(stdin);
+                if (temp == ' ') {
+                    c[i] = '\0';
+                    break;
+                }
                 if (temp == '\n') {
+                    c[i] = '\0';
                     j = 1;
                     break;
                 }
@@ -206,9 +221,12 @@ int main(int argc, const char * argv[]) {
         }
         
         if( j == 0){
-            for (short i = 0; i < 30; i++){
-                char temp = getchar_unlocked();
-                if (temp == EOF || temp == '\n') break;
+            for (short i = 0; i < 35; i++){
+                char temp = fgetc(stdin);
+                if (temp == '\n') {
+                    d[i] = '\0';
+                    break;
+                }
                 d[i] = temp;
             }
         }
@@ -222,23 +240,21 @@ int main(int argc, const char * argv[]) {
             }
         }else if(strcmp(a, "addrel") == 0){
             if (searchUser(usrRoot, b) != NULL && searchUser(usrRoot, c) != NULL){
-                struct relation *temp = malloc(sizeof(struct relation));
-                strcpy(temp -> name, d);
-                strcpy(temp -> from, b);
-                strcpy(temp -> to, c);
-                relRoot = addRelNode(relRoot, temp);
-                free(temp);
+                struct relation temp;
+                strcpy(temp.name, d);
+                strcpy(temp.from, b);
+                strcpy(temp.to, c);
+                relRoot = addRelNode(relRoot, &temp);
             }
         }else if(strcmp(a, "delrel") == 0){
             if (searchUser(usrRoot, b) != NULL && searchUser(usrRoot, c) != NULL){
-                struct relation *temp = malloc(sizeof(struct relation));
-                strcpy(temp -> name, d);
-                strcpy(temp -> from, b);
-                strcpy(temp -> to, c);
-                relRoot = rmvRelNode(relRoot, NULL, temp);
-                free(temp);
+                struct relation temp;
+                strcpy(temp.name, d);
+                strcpy(temp.from, b);
+                strcpy(temp.to, c);
+                relRoot = rmvRelNode(relRoot, NULL, &temp);
+
             }
-            
         }else if(strcmp(a, "report") == 0){
             if(relRoot == NULL) fputs("none\n", stdout);
             else {
@@ -268,7 +284,7 @@ int main(int argc, const char * argv[]) {
  
  short program(char* string){
  short i = 0, x = 0;
- char temp[30];
+ char temp[35];
  
  while(string[i] != '\0' && string[x] != ' '){
  temp[i] = string [x];
@@ -300,7 +316,7 @@ int main(int argc, const char * argv[]) {
  
  
  }else if(strcmp(temp, "addrel") == 0){
- char from[30], to[30], rel[30];
+ char from[35], to[35], rel[35];
  while(string[x] != ' '){
  from[i] = string [x];
  i++;
@@ -335,7 +351,7 @@ int main(int argc, const char * argv[]) {
  return 2;
  
  }else if(strcmp(temp, "delrel") == 0){
- char from[30], to[30], rel[30];
+ char from[35], to[35], rel[35];
  while(string[x] != ' '){
  from[i] = string [x];
  i++;
@@ -381,7 +397,7 @@ int main(int argc, const char * argv[]) {
  }
  */
 
-struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato){
+static inline struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato){
     if (nodo == NULL){
         return createRelNode(dato);
     }
@@ -397,7 +413,7 @@ struct nodeRel* addRelNode(struct nodeRel* nodo, struct relation *dato){
     return nodo;
 }
 
-struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato){
+static inline struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato){
     if (nodo == NULL){
         return createRecNode(dato);
     }
@@ -418,7 +434,7 @@ struct nodeReceiver* addRecNode(struct nodeReceiver *nodo, struct relation *dato
     return nodo;
 }
 
-struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato){
+static inline struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato){
     if (nodo == NULL){
         return createSenNode(dato);
     }
@@ -435,7 +451,7 @@ struct nodeSender* addSenNode(struct nodeSender *nodo, struct relation *dato){
 }
 
 
-struct nodeRel *createRelNode(struct relation *relation){
+static inline struct nodeRel *createRelNode(struct relation *relation){
     struct nodeRel *temp = malloc(sizeof(struct nodeRel));
     strcpy(temp -> nameRel, relation -> name);
     temp -> left = temp -> right = NULL;
@@ -443,7 +459,7 @@ struct nodeRel *createRelNode(struct relation *relation){
     return temp;
 }
 
-struct nodeReceiver *createRecNode(struct relation *relation){
+static inline struct nodeReceiver *createRecNode(struct relation *relation){
     struct nodeReceiver *temp = malloc(sizeof(struct nodeReceiver));
     strcpy(temp -> nameRec, relation -> to);
     temp -> qty = 1;
@@ -452,7 +468,7 @@ struct nodeReceiver *createRecNode(struct relation *relation){
     return temp;
 }
 
-struct nodeSender *createSenNode(struct relation *relation){
+static inline struct nodeSender *createSenNode(struct relation *relation){
     struct nodeSender *temp = malloc(sizeof(struct nodeSender));
     strcpy(temp -> nameSen, relation -> from);
     temp -> left = temp -> right = NULL;
@@ -461,7 +477,7 @@ struct nodeSender *createSenNode(struct relation *relation){
 
 
 
-struct nodeRel* minRelValueNode(struct nodeRel* node)
+static inline struct nodeRel* minRelValueNode(struct nodeRel* node)
 {
     struct nodeRel* current = node;
     
@@ -472,7 +488,7 @@ struct nodeRel* minRelValueNode(struct nodeRel* node)
     return current;
 }
 
-struct nodeReceiver* minRecValueNode(struct nodeReceiver* node){
+static inline struct nodeReceiver* minRecValueNode(struct nodeReceiver* node){
     struct nodeReceiver* current = node;
     // loop down to find the leftmost leaf
     while (current && current->left != NULL)
@@ -480,7 +496,7 @@ struct nodeReceiver* minRecValueNode(struct nodeReceiver* node){
     return current;
 }
 
-struct nodeSender* minSenValueNode(struct nodeSender* node){
+static inline struct nodeSender* minSenValueNode(struct nodeSender* node){
     struct nodeSender* current = node;
     // loop down to find the leftmost leaf
     while (current && current->left != NULL)
@@ -492,19 +508,19 @@ struct nodeSender* minSenValueNode(struct nodeSender* node){
 
 //Given a binary search tree and a key, this function deletes the key
 //and returns the new root
-struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel* nodo, struct relation *rel){
+static inline struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel* nodo, struct relation *rel){
     if (nodo == NULL) {
         // base case
         if (root == NULL) return root;
         
         // If the key to be deleted is smaller than the root's key,
         // then it lies in left subtree
-        if (strcmp(rel -> name, root -> nameRel) < 0 )
+        if (strcmp(rel -> name, root -> nameRel) < 0)
             root->left = rmvRelNode(root->left, nodo, rel);
         
         // If the key to be deleted is greater than the root's key,
         // then it lies in right subtree
-        else if (strcmp(rel -> name, root -> nameRel) > 0 )
+        else if (strcmp(rel -> name, root -> nameRel) > 0)
             root->right = rmvRelNode(root->right, nodo, rel);
         
         // if key is same as root's key, then This is the node
@@ -573,7 +589,7 @@ struct nodeRel* rmvRelNode(struct nodeRel* root, struct nodeRel* nodo, struct re
 
 //Given a binary search tree and a key, this function deletes the key
 //and returns the new root
-struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* nodo, struct relation *rel){
+static inline struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* nodo, struct relation *rel){
     if (nodo == NULL) {
         // base case
         if (root == NULL) return root;
@@ -654,7 +670,7 @@ struct nodeReceiver* rmvRecNode(struct nodeReceiver* root, struct nodeReceiver* 
 
 /* Given a binary search tree and a key, this function deletes the key
  and returns the new root */
-struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[30]){
+static inline struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[35]){
     // base case
     if (root == NULL) return root;
     
@@ -702,7 +718,7 @@ struct nodeSender* rmvSenNode(struct nodeSender* root, char dato[30]){
 
 
 
-short reportRel(struct nodeRel *nodo, short i){
+static inline short reportRel(struct nodeRel *nodo, short i){
     if (nodo != NULL)
     {
         if (nodo -> left != NULL) i = reportRel(nodo->left, i);
@@ -711,13 +727,13 @@ short reportRel(struct nodeRel *nodo, short i){
         fputs(" ", stdout);
         i = findMax (nodo -> nodeReceiver, 0);
         reportRec(nodo -> nodeReceiver, i);
-        printf("%d;", i);
+        fprintf(stdout, "%d;", i); //??
         if (nodo -> right != NULL) i = reportRel(nodo->right, i);
     }
     return i;
 }
 
-void reportRec(struct nodeReceiver *nodo, short i){
+static inline void reportRec(struct nodeReceiver *nodo, short i){
     if (nodo != NULL)
     {
         if (nodo -> left != NULL) reportRec(nodo -> left, i);
@@ -731,7 +747,7 @@ void reportRec(struct nodeReceiver *nodo, short i){
 
 
 
-short findMax(struct nodeReceiver *nodo, short i){
+static inline short findMax(struct nodeReceiver *nodo, short i){
     if(nodo != NULL){
         if (nodo -> left != NULL) i = findMax(nodo -> left, i);
         if (nodo -> qty > i) i = nodo -> qty;
@@ -742,7 +758,7 @@ short findMax(struct nodeReceiver *nodo, short i){
 
 
 
-void delSenTree(struct nodeSender **root){
+static inline void delSenTree(struct nodeSender **root){
     if(*root == NULL) return;
     delSenTree(&((*root) -> left));
     delSenTree(&((*root) -> right));
@@ -752,7 +768,7 @@ void delSenTree(struct nodeSender **root){
 
 
 
-struct nodeRel* scanRel (struct nodeRel *root, char dato[30]){
+static inline struct nodeRel* scanRel (struct nodeRel *root, char dato[35]){
     if (root != NULL){
         if( root -> left != NULL) root -> left = scanRel(root -> left, dato);
         if( root -> right != NULL) root -> right = scanRel(root -> right, dato);
@@ -763,7 +779,7 @@ struct nodeRel* scanRel (struct nodeRel *root, char dato[30]){
     return root;
 }
 
-struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]){
+static inline struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[35]){
     
     if (root != NULL) {
         if( root -> left != NULL) root -> left = scanRec(root -> left, dato);
@@ -789,7 +805,7 @@ struct nodeReceiver* scanRec (struct nodeReceiver *root, char dato[30]){
 
 
 
-struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeReceiver *nodo){
+static inline struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeReceiver *nodo){
     // base case
     if (root == NULL) return root;
     
@@ -800,7 +816,7 @@ struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeRecei
     
     // If the key to be deleted is greater than the root's key,
     // then it lies in right subtree
-    else if (strcmp(nodo -> nameRec, root -> nameRec) > 0)
+    else if (strcmp(nodo -> nameRec, root -> nameRec) > 0 )
         root->right = rmvEmptyRecNode(root->right, nodo);
     
     // if key is same as root's key, then This is the node
@@ -831,7 +847,7 @@ struct nodeReceiver* rmvEmptyRecNode(struct nodeReceiver *root, struct nodeRecei
     return root;
 }
 
-struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo){
+static inline struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo){
     // base case
     if (root == NULL) return root;
     
@@ -842,7 +858,7 @@ struct nodeRel* rmvEmptyRelNode(struct nodeRel *root, struct nodeRel *nodo){
     
     // If the key to be deleted is greater than the root's key,
     // then it lies in right subtree
-    else if (strcmp(nodo -> nameRel, root -> nameRel) > 0)
+    else if (strcmp(nodo -> nameRel, root -> nameRel) > 0 )
         root->right = rmvEmptyRelNode(root->right, nodo);
     
     // if key is same as root's key, then This is the node
